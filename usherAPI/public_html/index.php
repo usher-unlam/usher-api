@@ -9,7 +9,8 @@ En produccion, para que todos los request se ruteen a traves de este archivo, ve
 http://stackoverflow.com/questions/6890200/what-is-a-front-controller-and-how-is-it-implemented-in-php
 */
 
-//ini_set('display_errors', 'On');
+ini_set('error_reporting', E_ALL);
+ini_set('display_errors', 'On');
 require_once 'config.php';
 
 /*
@@ -17,11 +18,15 @@ Definimos path.
 En modo debug, $path ya está definida.
 Si no, se define en funcion del httpRequest.
 */
+$fullPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 if (!isset($path)) {
     //Esta linea salio de aca: Simulate Apache mod_rewrite routing
     //https://cloud.google.com/appengine/docs/php/config/mod_rewrite
-    $fullPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $path = str_replace('/usherAPI/public_html', '', $fullPath);
+    $path = $fullPath;
+    $path = str_replace('/usherAPI/public_html', '', $path);
+    $path = str_replace('/usher-api', '', $path);
+}else{
+    $path = $fullPath;
 }
 //$token = $_POST['token'];
 $token = $_GET['token'];
@@ -39,6 +44,6 @@ elseif (($path == '/calendar') && $auth == true) {
     include_once 'sgst_api/ics/'.$username.'.ics';
 }
 else{
-    echo 'Acceso denegado';
+    echo 'Acceso denegado' . $path;
 }
 ?>
