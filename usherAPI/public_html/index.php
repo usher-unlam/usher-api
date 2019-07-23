@@ -33,11 +33,6 @@ $auth = ($token == THISAPP_TOKEN ? true : false);
 if (($path == '/estado_banca') && $auth == true) {
     include_once 'check_status.php';
 }
-elseif (($path == '/calendar') && $auth == true) {
-    //include_once 'sgst_api/sgst_calendar.php';
-    $username = $_GET['username'];
-    include_once 'sgst_api/ics/'.$username.'.ics';
-}
 else{
     echo 'Acceso denegado';
 }
