@@ -4,7 +4,7 @@ $fullOutput = false;
 
 $link = conectar();
 $sqlQuery = "SELECT * FROM estado_banca ORDER BY id DESC LIMIT 1";
-$sqlQuery = "SELECT camserver, reg as id, tstamp as time, estadoUbicaciones as estado "
+$sqlQuery = "SELECT camserver, camserver as id, tstamp as time, estadoUbicaciones as estado "
 			. "FROM estado "
 			. "WHERE camserver = 'MANUAL' or tstamp > DATE_SUB(CURDATE(), INTERVAL 1 DAY) "
 			. "ORDER BY prioridad ASC, time DESC";
