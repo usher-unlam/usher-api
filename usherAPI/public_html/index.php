@@ -1,6 +1,7 @@
 <?php
 //header("Content-Type: text/html;charset=utf-8");
 header('Content-Type: application/json;charset=utf-8');
+header('Access-Control-Allow-Origin: *');
 /*
 Este archivo funciona como front controller.
 
@@ -38,6 +39,9 @@ $auth = ($token == THISAPP_TOKEN ? true : false);
 //Seleccionamos la acción que se ejecuta
 if (($path == '/estado_banca') && $auth == true) {
     include_once 'check_status.php';
+}
+elseif (($path == '/cnnmanage') && $auth == true) {
+    include_once 'cnn_manage.php';
 }
 else{
     echo 'Acceso denegado' . $path;
