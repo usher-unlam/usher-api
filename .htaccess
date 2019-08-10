@@ -1,4 +1,4 @@
-DirectorySlash Off
+DirectorySlash Off 
 Options FollowSymLinks Indexes
 DirectoryIndex index.php
 
