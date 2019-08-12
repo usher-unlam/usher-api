@@ -25,7 +25,7 @@ if (!isset($path)) {
     //Esta linea salio de aca: Simulate Apache mod_rewrite routing
     //https://cloud.google.com/appengine/docs/php/config/mod_rewrite
     $path = $fullPath;
-    $path = str_replace('/usherAPI/public_html', '', $path);
+    //$path = str_replace('/usherAPI/public_html', '', $path);
     $path = str_replace('/usher-api', '', $path);
 }else{
     $path = $fullPath;
@@ -42,6 +42,15 @@ if (($path == '/estado_banca') && $auth == true) {
 }
 elseif (($path == '/cnnmanage') && $auth == true) {
     include_once 'cnn_manage.php';
+}
+elseif (($path == '/login') && $auth == true) {
+    include_once 'login.php';
+}
+elseif (($path == '/refresh') && $auth == true) {
+    include_once 'refresh.php';
+}
+elseif (($path == '/register') && $auth == true) {
+    include_once 'register.php';
 }
 else{
     echo 'Acceso denegado' . $path;

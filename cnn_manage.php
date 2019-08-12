@@ -13,7 +13,7 @@ if(isset($_GET['id'])){
 
 if(isset($_GET['status'])){
   $status = $_GET['status'];
-  if($status == 'starting' || $status == 'off' || $status == 'restarting' || $status == 'suspending'){ 
+  if($status == 'starting' || $status == 'off' || $status == 'restarting' || $status == 'suspending' || $status == 'getstatus'){ 
   }
   else{
     echo "Error: Invalid status";
@@ -24,12 +24,23 @@ else{
     echo "Error: Unspecified status";
     exit;
 }
-  
-$sqlQuery = "UPDATE camserver SET status = '" .$status. "' WHERE id = '" .$id. "'"; 
+
+if($status == 'getstatus'){
+  $sqlQuery = "SELECT status FROM camserver WHERE id = '" .$id. "'";
+  }else{
+    $sqlQuery = "UPDATE camserver SET status = '" .$status. "' WHERE id = '" .$id. "'";
+  } 
 
 $resultado = mysqli_query($link, $sqlQuery);
 if($resultado){
-  echo "Succesfull";
+  if($status == 'getstatus'){
+    $rows = $resultado->fetch_all(MYSQLI_ASSOC);
+    echo $rows[0]['status'];
+    }else{
+      echo 'Succesfull';
+    }
+  }else{
+    echo 'Unsuccesfull';
   }
 
 //$resultado->free();
