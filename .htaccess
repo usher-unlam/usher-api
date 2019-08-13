@@ -1,0 +1,7 @@
+DirectorySlash Off 
+Options FollowSymLinks Indexes
+DirectoryIndex index.php
+
+RewriteEngine on
+
+RewriteRule ^.*$    index.php [L]
