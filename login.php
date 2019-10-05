@@ -28,6 +28,7 @@
 			$response["succes"] = true;  
 			$response["name"] = $name;
 			$response["surname"] = $surname;
+		}
     }
     
     echo json_encode($response);
