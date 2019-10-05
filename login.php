@@ -13,7 +13,7 @@
         mysqli_stmt_execute($statement);
     
         mysqli_stmt_store_result($statement);
-        mysqli_stmt_bind_result($statement, $userID, $name, $surname, $username, $password, $access, $tstamp);
+        mysqli_stmt_bind_result($statement, $userID, $name, $surname, $username, $password, $access, $tstamp, $member_id);
         }
     }
        

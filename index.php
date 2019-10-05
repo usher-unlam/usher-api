@@ -52,6 +52,9 @@ elseif (($path == '/refresh') && $auth == true) {
 elseif (($path == '/register') && $auth == true) {
     include_once 'register.php';
 }
+elseif (($path == '/sessions') && $auth == true) {
+    include_once 'sessions.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }
