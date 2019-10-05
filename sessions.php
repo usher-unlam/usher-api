@@ -7,20 +7,18 @@
     }*/
     
     if($link){
+	//Si recibo una fecha en particular busco la sesión correspondiente. Caso contrario traigo todas.
       if(isset($_POST['date'])){
         $date = $_POST["date"];
         $statement = mysqli_prepare($link, "SELECT * FROM sessions WHERE start_date = ?");
+		mysqli_stmt_bind_param($statement, "s", $date);
       }
       else{
-        $statement = mysqli_prepare($link, "SELECT * FROM sessions"); //WHERE username = ? AND password = ? AND access = ?");
+        $statement = mysqli_prepare($link, "SELECT * FROM sessions");
       }
       
-      if($statement){
-        if(isset($_POST['date'])){
-          mysqli_stmt_bind_param($statement, "s", $date);
-        }
+      if($statement){		
         mysqli_stmt_execute($statement);
-    
         mysqli_stmt_store_result($statement);
         mysqli_stmt_bind_result($statement, $session_id, $start_date, $end_date, $comment);
         }
