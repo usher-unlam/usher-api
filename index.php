@@ -55,6 +55,12 @@ elseif (($path == '/register') && $auth == true) {
 elseif (($path == '/sessions') && $auth == true) {
     include_once 'sessions.php';
 }
+elseif (($path == '/member_hist') && $auth == true) {
+    include_once 'member_hist.php';
+}
+elseif (($path == '/block_hist') && $auth == true) {
+    include_once 'block_hist.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }
