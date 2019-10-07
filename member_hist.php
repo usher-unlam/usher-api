@@ -21,7 +21,7 @@
 		if($statement){		
 			mysqli_stmt_execute($statement);
 			mysqli_stmt_store_result($statement);
-			mysqli_stmt_bind_result($statement, $block_name, $session_id, $member_id, $presences, $total);
+			mysqli_stmt_bind_result($statement, $block_name, $session_id, $member_surname, $member_name, $presences, $total);
         }
     }
        
