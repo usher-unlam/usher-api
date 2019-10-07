@@ -18,25 +18,27 @@
     if($link){
 		if($action == 'start'){
 			$statement = mysqli_prepare($link, "INSERT INTO `sessions` (`session_id`, `start_date`, `end_date`, `comment`)
-												VALUES (NULL, CURRENT_TIME(), '', ?)");
+												VALUES (NULL, CURRENT_TIME(), 0, ?)");
 			mysqli_stmt_bind_param($statement, "s", $comment);
 		}
-		else{
+		elseif($action == 'end'){
 			//buscar el registro más nuevo para saber qué sesión voy a cerrar (alternativamente puedo buscar una sesión a mano por si hubo algún error en el cierre... ver esto)
+			$statement = mysqli_prepare($link, "UPDATE `sessions` SET `end_date` = CURRENT_TIME() ORDER BY id DESC LIMIT 1");
 		}
       
 		if($statement){
-			mysqli_stmt_execute($statement)
+			mysqli_stmt_execute($statement);
 			//mysqli_stmt_store_result($statement);
 			//mysqli_stmt_bind_result($statement, $block_name, $session_id, $member_surname, $member_name, $presences, $total);
         }
     }
-    
-	printf("filas insertadas: %d\n", mysqli_stmt_affected_rows($stmt));
 	
     $response = array();
     $response["succes"] = false; 
 	
+	if(mysqli_stmt_affected_rows($statement)){
+		$response["succes"] = true;  
+	}
     /*while(mysqli_stmt_fetch($statement)){
         $response["succes"] = true;  
         $response[$session_id]["block"] = $block_name;
