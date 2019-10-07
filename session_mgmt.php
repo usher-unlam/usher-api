@@ -23,7 +23,7 @@
 		}
 		elseif($action == 'end'){
 			//buscar el registro más nuevo para saber qué sesión voy a cerrar (alternativamente puedo buscar una sesión a mano por si hubo algún error en el cierre... ver esto)
-			$statement = mysqli_prepare($link, "UPDATE `sessions` SET `end_date` = CURRENT_TIME() ORDER BY id DESC LIMIT 1");
+			$statement = mysqli_prepare($link, "UPDATE `sessions` SET `end_date` = CURRENT_TIME() ORDER BY session_id DESC LIMIT 1");
 		}
       
 		if($statement){
