@@ -8,13 +8,13 @@
     
     if($link){
       if(isset($_POST['username'])){
-        $date = $_POST["username"];
+        $username = $_POST["username"];
       }
 	  
-      $statement = mysqli_prepare($link, "SELECT blocks.name FROM users, blocks, members, member_history
+      $statement = mysqli_prepare($link, "SELECT blocks.name FROM users, blocks
 										  WHERE users.username LIKE ?
 										  AND users.member_id = blocks.head_id");
-		mysqli_stmt_bind_param($statement, "s", $username);");
+		mysqli_stmt_bind_param($statement, "s", $username);
       
       if($statement){		
         mysqli_stmt_execute($statement);
