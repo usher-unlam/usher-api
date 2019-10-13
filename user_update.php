@@ -11,7 +11,7 @@
     
     $response = array();
     
-    $checkexist = mysqli_prepare($link, "SELECT username FROM users WHERE username = ? AND password LIKE ?");
+    $checkexist = mysqli_prepare($link, "SELECT username FROM users WHERE username = ? AND password = ?");
     if($checkexist){
       mysqli_stmt_bind_param($checkexist, "ss", $username, $password);
       mysqli_stmt_execute($checkexist);     
@@ -19,9 +19,16 @@
         $response["succes"] = false;
         $response["error"] = "Usuario inexistente o contrase√±a incorrecta";
       }else{
+        //Hago un fetch m·s para llegar a NULL y liberar el objeto. Sin esto tira un "Command out of sync..."
+        mysqli_stmt_fetch($checkexist);
         $statement = mysqli_prepare($link, "UPDATE usher_web.users SET name = ?, surname = ?, password = ? WHERE username = ? AND password LIKE ?");
-        mysqli_stmt_bind_param($statement, "ssss", $name, $surname, $newpass, $username, $password);
-        mysqli_stmt_execute($statement);
+        if($statement){
+          mysqli_stmt_bind_param($statement, "sssss", $name, $surname, $newpass, $username, $password);
+          mysqli_stmt_execute($statement);
+        }
+        else{
+         echo mysqli_error($link);
+        }
         if($statement){
           $response["succes"] = true;
         }

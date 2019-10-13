@@ -70,6 +70,9 @@ elseif (($path == '/sync_mgmt') && $auth == true) {
 elseif (($path == '/block_head') && $auth == true) {
     include_once 'blockhead.php';
 }
+elseif (($path == '/usr_upd') && $auth == true) {
+    include_once 'user_update.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }

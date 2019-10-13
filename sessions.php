@@ -27,12 +27,15 @@
     $response = array();
     $response["succes"] = false; 
     
+    $pos = 0;
+    
     while(mysqli_stmt_fetch($statement)){
         $response["succes"] = true;  
-        $response[$session_id]["session"] = $session_id;
-        $response[$session_id]["start"] = $start_date;
-        $response[$session_id]["end"] = $end_date;
-        $response[$session_id]["comment"] = $comment;
+        $response[$pos]["session"] = $session_id;
+        $response[$pos]["start"] = $start_date;
+        $response[$pos]["end"] = $end_date;
+        $response[$pos]["comment"] = $comment;
+        $pos++;
     }
     
     echo json_encode($response);
