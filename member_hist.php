@@ -7,7 +7,10 @@
     }
 	else{
 		//error, se espera un nombre de usuario
-	}
+	  }
+    if(isset($_POST['session'])){
+      $session = $_POST['session'];
+    }
     
     if($link){
 		$statement = mysqli_prepare($link, "SELECT blocks.name, member_history.session_id, members.surname, members.name, member_history.presences, member_history.total
@@ -15,8 +18,9 @@
 											WHERE users.username LIKE ?
 											AND users.member_id = blocks.head_id
 											AND blocks.id_block = member_history.block_id
-											AND member_history.member_id = members.id_member");
-		mysqli_stmt_bind_param($statement, "s", $username);
+											AND member_history.member_id = members.id_member
+                      AND member_history.session_id = ?");
+		mysqli_stmt_bind_param($statement, "ss", $username, $session);
       
 		if($statement){		
 			mysqli_stmt_execute($statement);
@@ -26,16 +30,19 @@
     }
        
     $response = array();
-    $response["succes"] = false; 
+    $response["succes"] = false;
+     
+    $pos = 0;
     
     while(mysqli_stmt_fetch($statement)){
         $response["succes"] = true;  
-        $response[$session_id]["block"] = $block_name;
-        $response[$session_id]["session"] = $session_id;
-		$response[$session_id]["member_surname"] = $member_surname;
-        $response[$session_id]["member_name"] = $member_name;
-        $response[$session_id]["presences"] = $presences;
-		$response[$session_id]["total"] = $total;
+        $response[$pos]["session"] = $session_id;
+        $response[$pos]["block"] = $block_name;
+		    $response[$pos]["member_surname"] = $member_surname;
+        $response[$pos]["member_name"] = $member_name;
+        $response[$pos]["presences"] = $presences;
+		    $response[$pos]["total"] = $total;
+        $pos++;
     }
     
     echo json_encode($response);

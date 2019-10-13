@@ -10,11 +10,11 @@
 	//Si recibo una fecha en particular busco la sesión correspondiente. Caso contrario traigo todas.
       if(isset($_POST['date'])){
         $date = $_POST["date"];
-        $statement = mysqli_prepare($link, "SELECT * FROM sessions WHERE start_date = ?");
+        $statement = mysqli_prepare($link, "SELECT * FROM sessions WHERE start_date = ? ");
 		mysqli_stmt_bind_param($statement, "s", $date);
       }
       else{
-        $statement = mysqli_prepare($link, "SELECT * FROM sessions");
+        $statement = mysqli_prepare($link, "SELECT * FROM sessions WHERE end_date > 0");
       }
       
       if($statement){		
