@@ -67,6 +67,9 @@ elseif (($path == '/session_mgmt') && $auth == true) {
 elseif (($path == '/sync_mgmt') && $auth == true) {
     include_once 'sync_mgmt.php';
 }
+elseif (($path == '/block_head') && $auth == true) {
+    include_once 'blockhead.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }
