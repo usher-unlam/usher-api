@@ -7,21 +7,13 @@
     }
     
     if($link){
-	    $statement = mysqli_prepare($link, "ALTER EVENT usher_web.status_sync ?");
-		mysqli_stmt_bind_param($statement, "s", $action);
-      
-        if($statement){		
-			mysqli_stmt_execute($statement);
-			mysqli_stmt_store_result($statement);
-        }
-    }
-       
-    $response = array();
-    $response["succes"] = false; 
-    
-    while(mysqli_stmt_fetch($statement)){
-        $response["succes"] = true;  
-    }
+      $response = array();
+      if(mysqli_query($link, "ALTER EVENT usher_web.status_sync " .$action)){
+        $response["succes"] = true;
+        }else{
+          $response["succes"] = false;
+          }
+    }   
     
     echo json_encode($response);
     
