@@ -7,7 +7,7 @@
     }
     
     if($link){
-	    $statement = mysqli_prepare($link, "ALTER EVENT usher_web.sync_status ?");
+	    $statement = mysqli_prepare($link, "ALTER EVENT usher_web.status_sync ?");
 		mysqli_stmt_bind_param($statement, "s", $action);
       
         if($statement){		
