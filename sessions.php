@@ -13,6 +13,13 @@
         $statement = mysqli_prepare($link, "SELECT session_id, start_date, end_date, comment FROM sessions WHERE start_date = ? ");
 		mysqli_stmt_bind_param($statement, "s", $date);
       }
+      elseif(isset($_POST['isrunning'])){
+		    $dateYesterday = new DateTime();
+		    $dateYesterday->add(DateInterval::createFromDateString('yesterday'));
+        $dYest = $dateYesterday->format('Y,m,d');
+        $statement = mysqli_prepare($link, "SELECT session_id, start_date, end_date, comment FROM sessions WHERE start_date >= ? AND end_date = 0 ");
+		  mysqli_stmt_bind_param($statement, "s", $dYest);
+      }
       else{
         $statement = mysqli_prepare($link, "SELECT session_id, start_date, end_date, comment FROM sessions WHERE end_date > 0");
       }
