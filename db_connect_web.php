@@ -20,7 +20,7 @@ $pass = "usher101";
     
                 exit;
         } else
-                //$link->set_charset("utf8");
+                $link->set_charset("utf8");
         return $link;
 }
 ?>
