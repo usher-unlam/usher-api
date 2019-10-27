@@ -44,17 +44,44 @@ if(isset($_POST['banca'])){
 		    $fetch[$camserver]["tstamp"] = $tstamp;
     }
     
-    for ($i=0; $i < strlen($fetch["MANUAL"]["benchs"]); $i++){
+    $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member, associated_block, manual_state FROM benchs");
+    
+    if($statement_benchs){
+       mysqli_stmt_execute($statement_benchs);
+       mysqli_stmt_store_result($statement_benchs);
+			 mysqli_stmt_bind_result($statement_benchs, $number, $associated_member, $associated_block, $manual_state);
+    }
+    else{
+       $response["error"] = "La consulta a las bancas no fue ejecutada";
+    }
+    
+    while(mysqli_stmt_fetch($statement_benchs)){
+        $benchs[$number] = $manual_state;
+    }
+   
+    //El array de bancas arranca en la posición 1; En la tabla está así, por eso arranco con $i+1. Así devuelvo la info correspondiente a cada banca en su subíndice
+    for ($i=0; $i < count($benchs); $i++){
+        if($benchs[$i+1] < 2){
+           $defStatus[$i+1] = $benchs[$i+1];
+        }
+        else{
+           $defStatus[$i+1] = $fetch[$svr]["benchs"][$i];
+        }
+    }
+    
+    /*for ($i=0; $i < strlen($fetch["MANUAL"]["benchs"]); $i++){
           if($fetch["MANUAL"]["benchs"][$i] == 2){
             $defStatus[$i] = $fetch[$svr]["benchs"][$i];
           }
           else{
             $defStatus[$i] = $fetch["MANUAL"]["benchs"][$i];
           }
-    }
+    }*/
     
-    if($response["succes"])
+    if($response["succes"]){
       $response["status"] = $defStatus;
+      $response["benchs"] = $benchs;
+    }
     
     echo json_encode($response);
     

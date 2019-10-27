@@ -76,6 +76,9 @@ elseif (($path == '/usr_upd') && $auth == true) {
 elseif (($path == '/check_status') && $auth == true) {
     include_once 'check_status_web.php';
 }
+elseif (($path == '/set_status') && $auth == true) {
+    include_once 'set_status.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }
