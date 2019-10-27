@@ -59,14 +59,18 @@ if(isset($_POST['banca'])){
         $benchs[$number] = $manual_state;
     }
    
+   $defStatus = '';
+   $manual_state = '';
+   
     //El array de bancas arranca en la posición 1; En la tabla está así, por eso arranco con $i+1. Así devuelvo la info correspondiente a cada banca en su subíndice
     for ($i=0; $i < count($benchs); $i++){
         if($benchs[$i+1] < 2){
-           $defStatus[$i+1] = $benchs[$i+1];
+           $defStatus .= $benchs[$i+1];
         }
         else{
-           $defStatus[$i+1] = $fetch[$svr]["benchs"][$i];
+           $defStatus .= $fetch[$svr]["benchs"][$i];
         }
+        $manual_state .= $benchs[$i+1];
     }
     
     /*for ($i=0; $i < strlen($fetch["MANUAL"]["benchs"]); $i++){
@@ -80,7 +84,7 @@ if(isset($_POST['banca'])){
     
     if($response["succes"]){
       $response["status"] = $defStatus;
-      $response["benchs"] = $benchs;
+      $response["manual_state"] = $manual_state;
     }
     
     echo json_encode($response);
