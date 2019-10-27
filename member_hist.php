@@ -12,8 +12,11 @@
       $session = $_POST['session'];
     }
     
+    $response = array();
+    $response["error"] = $username. " " .$session;
+    
     if($link){
-		$statement = mysqli_prepare($link, "SELECT blocks.name, member_history.session_id, members.surname, members.name, member_history.presences, member_history.total
+		$statement = mysqli_prepare($link, "SELECT blocks.name, member_history.session_id, members.surname, members.name, members.image_url, member_history.presences, member_history.total
 											FROM users, blocks, members, member_history
 											WHERE users.username LIKE ?
 											AND users.member_id = blocks.head_id
@@ -25,11 +28,16 @@
 		if($statement){		
 			mysqli_stmt_execute($statement);
 			mysqli_stmt_store_result($statement);
-			mysqli_stmt_bind_result($statement, $block_name, $session_id, $member_surname, $member_name, $presences, $total);
+			mysqli_stmt_bind_result($statement, $block_name, $session_id, $member_surname, $member_name, $member_pic, $presences, $total);
         }
+     else{
+       $response["error"] = "La consulta no fue ejecutada";
+       }
+    }
+    else{
+      $response["error"] = "No se estableció la conexión a la base de datos";
     }
        
-    $response = array();
     $response["succes"] = false;
      
     $pos = 0;
@@ -40,6 +48,7 @@
         $response[$pos]["block"] = $block_name;
 		    $response[$pos]["member_surname"] = $member_surname;
         $response[$pos]["member_name"] = $member_name;
+        $response[$pos]["photo"] = $member_pic;
         $response[$pos]["presences"] = $presences;
 		    $response[$pos]["total"] = $total;
         $pos++;

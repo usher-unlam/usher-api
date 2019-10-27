@@ -73,6 +73,9 @@ elseif (($path == '/block_head') && $auth == true) {
 elseif (($path == '/usr_upd') && $auth == true) {
     include_once 'user_update.php';
 }
+elseif (($path == '/check_status') && $auth == true) {
+    include_once 'check_status_web.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }
