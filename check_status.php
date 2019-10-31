@@ -2,7 +2,7 @@
 require_once 'db_connect.php';
 $fullOutput = false;
 
-$link = conectar();
+$link = conectarRec();
 $sqlQuery = "SELECT * FROM estado_banca ORDER BY id DESC LIMIT 1";
 $sqlQuery = "SELECT camserver, camserver as id, tstamp as time, estadoUbicaciones as estado "
 			. "FROM estado "

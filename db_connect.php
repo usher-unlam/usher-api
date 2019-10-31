@@ -1,5 +1,5 @@
 <?php
-function conectar()
+function conectarRec()
 {
 $server = "usher.sytes.net";
 $database = "usher_rec";
