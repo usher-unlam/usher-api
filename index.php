@@ -79,8 +79,11 @@ elseif (($path == '/check_status') && $auth == true) {
 elseif (($path == '/set_status') && $auth == true) {
     include_once 'set_status.php';
 }
-elseif (($path == '/fill_history') && $auth == true) {
-    include_once 'fill_history.php';
+elseif (($path == '/sync_history') && $auth == true) {
+    include_once 'sync_history.php';
+}
+elseif (($path == '/fill_member_hist') && $auth == true) {
+    include_once 'fill_member_hist.php';
 }
 else{
     echo 'Acceso denegado' . $path;

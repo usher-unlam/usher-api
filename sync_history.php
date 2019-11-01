@@ -23,9 +23,9 @@ if(isset($_POST['banca'])){
 if($linkRec){
 		$statement = mysqli_prepare($linkRec, "SELECT camserver, prioridad, MAX(tstamp), estadoUbicaciones
     									FROM estado
-											WHERE camserver LIKE ?
-                      OR camserver LIKE 'MANUAL'
-                      GROUP BY camserver");
+											WHERE camserver LIKE ? ");
+                      /*OR camserver LIKE 'MANUAL'
+                      GROUP BY camserver");*/
 		mysqli_stmt_bind_param($statement, "s", $svr);
       
 		if($statement){		
