@@ -10,7 +10,6 @@ import os
 from urllib.parse import urlparse
 from datetime import datetime as time
 from datetime import timedelta as delta
-import cv2.cv2 as cv2
 
 from enum import IntEnum
 class Status(IntEnum):

@@ -13,8 +13,9 @@ from textwrap import wrap
 class CronServer():
     def __init__(self, nombre="", dbConfig={}):
         self.DEF_IGNORE_CHAR = '_'
+        self.DEF_INIT_STATUS = cn.Status.STARTING
         self.conf = { "CRON_TIMEJUMP_SEC": 0.1,
-                    "sync_frec": 3500, "API_validation": "48370255gBrgdlpl050588",
+                    "sync_frec": 300, "API_validation": "48370255gBrgdlpl050588",
                     "CONN_TIMEOUT": 0.6, "CONN_CHECK_TIMEOUT": 5 , 
                     "DB_TIMEOUT" : { "CONNECT": 3, "STATUS_READ": 1000, "STATUS_WRITE": 2000 }
                     } 
@@ -32,8 +33,8 @@ class CronServer():
         
         # Procesa setup obteniendo ultimo estado (recuperación post falla)
         currStatus = self.setup()
-        # Define estado a procesar segun estado previo (Status.SUSPENDING por defecto) 
-        newStatus = cn.Status.SUSPENDING if currStatus in [cn.Status.OFF,cn.Status.RESTARTING] else cn.Status(2 * (int(currStatus) // 2))
+        # Define estado a procesar segun estado previo (Status.STARTING por defecto) 
+        newStatus = self.DEF_INIT_STATUS if currStatus in [cn.Status.OFF,cn.Status.RESTARTING] else cn.Status(2 * (int(currStatus) // 2))
         print("BD", currStatus, "=> procesar", newStatus)
         # Definir nuevo estado y guardar en BBDD
         self.processNewState(newStatus) 
