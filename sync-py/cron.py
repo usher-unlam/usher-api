@@ -15,7 +15,8 @@ class CronServer():
     def __init__(self, nombre="", dbConfig={}):
         self.DEF_IGNORE_CHAR = '_'
         self.DEF_INIT_STATUS = cn.Status.STARTING
-        self.conf = { "CRON_TIMEJUMP_SEC": 0.1,
+        self.conf = { "camserver": "SVR1", 
+                    "CRON_TIMEJUMP_SEC": 0.1,
                     "sync_frec": 300, "fill_block_frec": 500,
                     "API_validation": "48370255gBrgdlpl050588",
                     "CONN_TIMEOUT": 0.6, "CONN_CHECK_TIMEOUT": 5 , 
@@ -71,8 +72,10 @@ class CronServer():
         # Actualizar diccionario de configuracion (se reemplazan valores coincidentes)
         self.conf.update(newConf)
         # Actualiza configuracion de Request a APIs
-        self.rq_sync_history.setup(apikey= self.conf["API_validation"])
-        self.rq_fill_block_hist.setup(apikey= self.conf["API_validation"])
+        paramDef = {"server": self.conf["camserver"]}
+        apikey = self.conf["API_validation"]
+        self.rq_sync_history.setup(params= paramDef, apikey= apikey)
+        self.rq_fill_block_hist.setup(params= paramDef, apikey= apikey)
         # Actualiza configuracion BBDD
         self.source.setup(self.conf["DB_TIMEOUT"])
     ##TODO: chequear newStatus no es asignado
