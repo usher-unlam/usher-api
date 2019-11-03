@@ -151,6 +151,10 @@ class CronServer():
                         lastsync = now
                         #request a API de sincronización
                         response = self.rq_sync_history.request()
+                        if type(response) is str or not response['succes']:
+                            pass # ERROR
+                        else:
+                            pass # EXITO
                     #----------------------------- SYNC end -------------------------
                     
                     #----------------------------- FILL_BLOCK start -------------------------
@@ -162,6 +166,10 @@ class CronServer():
                         lastfill_block = now
                         #request a API de sincronización
                         response = self.rq_fill_block_hist.request()
+                        if type(response) is str or not response['succes']:
+                            pass # ERROR
+                        else:
+                            pass # EXITO
                     #----------------------------- FILL_BLOCK end -------------------------
                     
                     # permitir a otro thread trabajar

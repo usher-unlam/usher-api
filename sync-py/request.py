@@ -37,14 +37,14 @@ class HTTPRequest():
         if not respType is None:
             self.respType = respType
 
-    def get(self, url=None, dataDict=None, respType=ResponseType.Text):
+    def get(self, url=None, dataDict=None, respType=None):
         url = url if not url is None and url != "" else self.url
         dataDict = dataDict if not dataDict is None and dataDict != {} else self.params
         apikey = None if self.apikey == "" else self.apikey
         respType = respType if not respType is None and respType != "" else self.respType
         return HTTPRequest.sendRequest(url= url, dataDict= dataDict, method= Method.GET, apikey= apikey, respType= respType)
 
-    def post(self, url=None, dataDict=None, apikey=None, respType=ResponseType.Text):
+    def post(self, url=None, dataDict=None, apikey=None, respType=None):
         url = url if not url is None and url != "" else self.url
         dataDict = dataDict if not dataDict is None and dataDict != {} else self.params
         apikey = apikey if not apikey is None and apikey != "" else self.apikey
@@ -83,7 +83,11 @@ class HTTPRequest():
             if respType == ResponseType.Text:
                 data = r.text # extracting data as text 
             elif respType == ResponseType.JSON:
-                data = r.json() # extracting data in json format 
+                # si el formato no es compatible con JSON, devuelve el Texto
+                try:
+                    data = r.json() # extracting data in json format 
+                except BaseException as wrongFormat:
+                    data = r.text # extracting data as text 
             else:
                 data = None #TODO: excepcion "tipo de respuesta no soportada"
             # extracting val1 
