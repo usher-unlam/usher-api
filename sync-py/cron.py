@@ -3,6 +3,7 @@
 import sys
 import os
 
+import request as rq
 import conector as cn
 
 import time as t
@@ -15,13 +16,22 @@ class CronServer():
         self.DEF_IGNORE_CHAR = '_'
         self.DEF_INIT_STATUS = cn.Status.STARTING
         self.conf = { "CRON_TIMEJUMP_SEC": 0.1,
-                    "sync_frec": 300, "API_validation": "48370255gBrgdlpl050588",
+                    "sync_frec": 300, "fill_block_frec": 500,
+                    "API_validation": "48370255gBrgdlpl050588",
                     "CONN_TIMEOUT": 0.6, "CONN_CHECK_TIMEOUT": 5 , 
                     "DB_TIMEOUT" : { "CONNECT": 3, "STATUS_READ": 1000, "STATUS_WRITE": 2000 }
                     } 
         self.nombre = nombre
         self.status = cn.Status.OFF
         print("Iniciando servidor",self.nombre)
+
+        # Crear objetos Request a APIs
+        self.rq_sync_history = rq.HTTPRequest(url='https://usher.sytes.net/usher-api/sync_history',
+                                            method=rq.Method.GET,
+                                            respType=rq.ResponseType.JSON)
+        self.rq_fill_block_hist = rq.HTTPRequest(url='https://usher.sytes.net/usher-api/fill_block_hist',
+                                            method=rq.Method.GET,
+                                            respType=rq.ResponseType.JSON)
         
         # Establecer conexion con BBDD
         self.source = cn.DBSource(dbConfig,self.conf["DB_TIMEOUT"],self)
@@ -60,6 +70,9 @@ class CronServer():
         
         # Actualizar diccionario de configuracion (se reemplazan valores coincidentes)
         self.conf.update(newConf)
+        # Actualiza configuracion de Request a APIs
+        self.rq_sync_history.setup(apikey= self.conf["API_validation"])
+        self.rq_fill_block_hist.setup(apikey= self.conf["API_validation"])
         # Actualiza configuracion BBDD
         self.source.setup(self.conf["DB_TIMEOUT"])
     ##TODO: chequear newStatus no es asignado
@@ -110,8 +123,10 @@ class CronServer():
     def runService(self):
         try:
             now = time.now()
-            # inicializa última sincronizacion
+            # inicializa última sincronizacion de estados
             lastsync = now 
+            # inicializa última carga de bloques
+            lastfill_block = now 
             # Bucle infinito (funciona en background como servicio)
             while not self.keyStop():
                 now = time.now()
@@ -131,9 +146,20 @@ class CronServer():
                     if tout.total_seconds() > self.conf["sync_frec"]:
                         # Actualizar lastsync
                         lastsync = now
-                        #TODO: Ejecutar Sync
-                        pass #llamado a API con self.conf["API_validation"]
+                        #request a API de sincronización
+                        response = self.rq_sync_history.request()
                     #----------------------------- SYNC end -------------------------
+                    
+                    #----------------------------- FILL_BLOCK start -------------------------
+                    # Evalúa si corresponde ejecutar Sync
+                    tout = now - lastfill_block
+                    #print(tout,time.now(),toutDiff)
+                    if tout.total_seconds() > self.conf["fill_block_frec"]:
+                        # Actualizar lastsync
+                        lastfill_block = now
+                        #request a API de sincronización
+                        response = self.rq_fill_block_hist.request()
+                    #----------------------------- FILL_BLOCK end -------------------------
                     
                     # permitir a otro thread trabajar
                     t.sleep(self.conf["CRON_TIMEJUMP_SEC"])
