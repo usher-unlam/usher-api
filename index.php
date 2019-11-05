@@ -43,6 +43,9 @@ if (($path == '/estado_banca') && $auth == true) {
 elseif (($path == '/cnnmanage') && $auth == true) {
     include_once 'cnn_manage.php';
 }
+elseif (($path == '/cronmanage') && $auth == true) {
+    include_once 'cron_manage.php';
+}
 elseif (($path == '/login') && $auth == true) {
     include_once 'login.php';
 }
