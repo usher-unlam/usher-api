@@ -7,7 +7,7 @@
     $surname = $_POST["surname"];
     $username = $_POST["username"];
     $password = $_POST["password"];
-    $access = $_POST["access"];
+    //$access = $_POST["access"];
     
     $response = array();
     
@@ -19,8 +19,8 @@
         $response["succes"] = false;
         $response["error"] = "Usuario existente";
       }else{
-        $statement = mysqli_prepare($link, "INSERT INTO users (name, surname, username, password, access) VALUES (?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($statement, "sssss", $name, $surname, $username, $password, $access);
+        $statement = mysqli_prepare($link, "INSERT INTO users (name, surname, username, password, access, member_id) VALUES (?, ?, ?, ?, '0', '0')");
+        mysqli_stmt_bind_param($statement, "ssss", $name, $surname, $username, $password);
         mysqli_stmt_execute($statement);
         if($statement){
           $response["succes"] = true;

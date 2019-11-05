@@ -52,6 +52,39 @@ elseif (($path == '/refresh') && $auth == true) {
 elseif (($path == '/register') && $auth == true) {
     include_once 'register.php';
 }
+elseif (($path == '/sessions') && $auth == true) {
+    include_once 'sessions.php';
+}
+elseif (($path == '/member_hist') && $auth == true) {
+    include_once 'member_hist.php';
+}
+elseif (($path == '/block_hist') && $auth == true) {
+    include_once 'block_hist.php';
+}
+elseif (($path == '/session_mgmt') && $auth == true) {
+    include_once 'session_mgmt.php';
+}
+elseif (($path == '/sync_mgmt') && $auth == true) {
+    include_once 'sync_mgmt.php';
+}
+elseif (($path == '/block_head') && $auth == true) {
+    include_once 'blockhead.php';
+}
+elseif (($path == '/usr_upd') && $auth == true) {
+    include_once 'user_update.php';
+}
+elseif (($path == '/check_status') && $auth == true) {
+    include_once 'check_status_web.php';
+}
+elseif (($path == '/set_status') && $auth == true) {
+    include_once 'set_status.php';
+}
+elseif (($path == '/sync_history') && $auth == true) {
+    include_once 'sync_history.php';
+}
+elseif (($path == '/fill_member_hist') && $auth == true) {
+    include_once 'fill_member_hist.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }

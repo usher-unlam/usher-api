@@ -2,7 +2,7 @@
 require_once 'db_connect.php';
 $fullOutput = false;
 
-$link = conectar();
+$link = conectarRec();
 if(isset($_GET['id'])){
   $id = $_GET['id'];
   }
