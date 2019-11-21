@@ -83,6 +83,7 @@ if(isset($_POST['banca'])){
     if($response["succes"]){
       $response["status"] = $defStatus;
       $response["manual_state"] = $manual_state;
+      $response["read_state"] = $fetch[$svr]["benchs"];
     }
     
     }

@@ -1,5 +1,6 @@
 <?php
     require_once 'db_connect_web.php';
+    require_once 'reset_manual_state.php';
 	// inicializacion
 	$link = conectar();
     $response = array();
@@ -42,7 +43,12 @@
     $response["succes"] = false;
 	
 	if(!is_null($statement) && mysqli_stmt_affected_rows($statement)){
-		$response["succes"] = true;  
+    $response["succes"] = true;
+    if($action == 'start'){
+      if(!reset_manual()){
+        $response["alerta"] = "No se reiniciaron los estados manuales de las bancas";
+      }
+    }
 	}
     
 	echo json_encode($response);
