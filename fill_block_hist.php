@@ -1,5 +1,3 @@
-//REVISAR TODA LA LÓGICA
-
 <?php
 require_once 'db_connect_web.php';
 
@@ -17,8 +15,9 @@ if($link){
 		$statement = mysqli_prepare($link, "SELECT camserver, prioridad, tstamp, estadoUbicaciones
     									FROM status
 											WHERE camserver LIKE 'SVR1'
-                      ORDER BY tstamp DESC");
-		//mysqli_stmt_bind_param($statement, "s", $svr);
+                      ORDER BY tstamp DESC
+                      LIMIT 2");
+		//Revisar esta lógica para que no traiga un registro correspondiente a la sesión anterior (validar por fecha en la query)
       
 		if($statement){		
 			mysqli_stmt_execute($statement);
@@ -26,10 +25,10 @@ if($link){
 			mysqli_stmt_bind_result($statement, $camserver, $priority, $tstamp, $estadoUbicaciones);
     }
     else{
-       $response["error"] = "La consulta no fue ejecutada";
+       $response["error"] = "La consulta de estados no fue ejecutada";
     }
     
-    $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member, associated_block FROM benchs");
+    $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member_id, associated_block_id FROM benchs");
       
     if($statement_benchs){		
 			  mysqli_stmt_execute($statement_benchs);
@@ -44,77 +43,52 @@ else{
    $response["error"] = "No se estableció la conexión a la base de datos";
 }
 
-//$benchs["succes"] = false;       
-//$response["succes"] = false;
+$response["succes"] = false;
 
-//Primero tengo que saber a qué bloque pertenece cada banca. Cargo array de bancas con bloques y miembros asociados
+//Cargo el array de bancas para poder hacer las asignaciones correspondientes desde el array en el próximo paso.
+//Inicializo los contadores de totales y presentes para cada bloque.
 While(mysqli_stmt_fetch($statement_benchs)){
-  $benchs[$number][$block] = $associated_block;
-  $benchs[$number][$member] = $associated_member;
+  $bench_block[$number] = $associated_block;
+  $bench_member[$number] = $associated_member;
+  $blocks[$associated_block]["presents"] = 0;
+  $blocks[$associated_block]["total"] = 0; 
 }
 
-//Hasta ACA estaría OK
-
-$minutes = 0;
-$regTot= 0;
-//Hago un primer fetch para inicializar el array de bloques con los valores en 0 y para conocer la cantidad de bancas para el for
+//Hago un fetch para ver el registro más reciente de status (leí 2) y voy sumando en un array usando de índice associated_block los presentes y los totales de cada bloque
+//Luego minutes se calcula haciendo la diferencia entre el tstamp del registro más actual y el siguiente.
 mysqli_stmt_fetch($statement);
-$regTot++;
-for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){ 
-    $blocks[$benchs[$i][$block]]["presents"] = 0;
+$record_time = date_create_from_format('Y-m-d H:i:s',$tstamp);
+
+//Las bancas arrancan en 1... como el índice de $bench_block son las bancas, debo arrancar el for en 1. 
+for($j = 1; $j <= strlen($estadoUbicaciones); $j++){ 
+  $blocks[$bench_block[$j]]["presents"] += intval($estadoUbicaciones[$j-1]);
+  $blocks[$bench_block[$j]]["total"]++;
 }
 
-// Luego de inicializado, recorro el primer row de nuevo para sumar los estados presentes de cada bloque.
-// En $benchs[$i][$block] tengo el bloque al cual pertenece la banca correspondiente a la posición del string que estoy leyendo (estado)
-for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){
-    $blocks[$benchs[$i][$block]]["session"] = $session; 
-    $blocks[$benchs[$i][$block]]["presents"] += $estadoUbicaciones[$i-1];
+//Hago un segundo fetch para leer el registro de estado inmediatamente anterior y calcular la diferencia de tiempo entre ambos. Si es el primer registro que leo va a dar false la lectura.
+//Si es el primer registro le cargo '0'.
+if(mysqli_stmt_fetch($statement)){
+  $record_time = $record_time->diff(date_create_from_format('Y-m-d H:i:s',$tstamp));
+  echo "Diferencia de minutos entre lecturas: " .$record_time->i. "\n";
+}
+else{
+  $time = 0;
 }
 
-// Sumo las precencias 1correspondientes a los 
-While(mysqli_stmt_fetch($statement)){
-  for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){
-    $blocks[$benchs[$i][$block]]["session"] = $session; 
-    $blocks[$benchs[$i][$block]]["presents"] += $estadoUbicaciones[$i-1];
-  }
-}
-
-//Recorro las rows y para cada una recorro el string estadoUbicaciones y sumo (0 o 1) a la cantidad de presencias de cada banca ($benchs[$i]) 
-while(mysqli_stmt_fetch($statement)){
-     $response["succes"] = true;
-     for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){ 
-       $benchs[$i]["presences"] = $benchs[$i]["presences"] + (int) $estadoUbicaciones[$i-1];
-     }
-     $regTotales++;
-}
-
-if($response["succes"]){
-      $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member, associated_block FROM benchs");
-      
-      if($statement_benchs){		
-			  mysqli_stmt_execute($statement_benchs);
-			  mysqli_stmt_store_result($statement_benchs);
-			  mysqli_stmt_bind_result($statement_benchs, $number, $associated_member, $associated_block);
-      }
-      else{
-         $response["error"] = "La consulta de bancas no fue ejecutada";
-      } 
-
-      //En cada row tengo una banca. Guardo el associated_block en el array de benchs que cargué en el While anterior y cargo el total de registros leídos en 'status'
-      while(mysqli_stmt_fetch($statement_benchs)){
-        $benchs[$number]["block_id"] = $associated_block;
-        $benchs[$number]["member_id"] = $associated_member;
-        $benchs[$number]["total"] = $regTotales;
-      }
-}
-
+//Acá preparo el insert
 $insertions = 0;
-for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){		
-    $statement_insert = mysqli_prepare($link, "INSERT INTO member_history (session_id, block_id, member_id, presences, total) VALUES (?, ?, ?, ?, ?)");
+echo "Estadisticas de sesion: " .$session. "\n";
+//Recorro el array de bloques y realizando los inserts.
+foreach($blocks as $block_id => $block_info){
+  //print_r($block_id);
+  //echo "Bloque numero: " .$block_id. " - Presentes: " .$block_info["presents"]. " - Total: " .$block_info["total"]. "\n";
+  //}
+    $statement_insert = mysqli_prepare($link, "INSERT INTO block_history (session_id, block_id, minutes, presents, total) VALUES (?, ?, ?, ?, ?)");
     if($statement_insert){
-      mysqli_stmt_bind_param($statement_insert, "sssss", $session, $benchs[$i]["block_id"], $benchs[$i]["member_id"], $benchs[$i]["presences"], $benchs[$i]["total"]);
+      mysqli_stmt_bind_param($statement_insert, "sssss", $session, $block_id, $record_time->i, $block_info["presents"], $block_info["total"]);
       if(mysqli_stmt_execute($statement_insert)){
         $insertions++;
+        $response["succes"] = true;
       }
       else{
         $response["error"] = mysqli_error($link);

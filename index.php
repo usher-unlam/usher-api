@@ -88,6 +88,9 @@ elseif (($path == '/sync_history') && $auth == true) {
 elseif (($path == '/fill_member_hist') && $auth == true) {
     include_once 'fill_member_hist.php';
 }
+elseif (($path == '/fill_block_hist') && $auth == true) {
+    include_once 'fill_block_hist.php';
+}
 else{
     echo 'Acceso denegado' . $path;
 }

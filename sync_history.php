@@ -51,7 +51,7 @@ while(mysqli_stmt_fetch($statement)){
 }
     
 if($link){
-     $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member, associated_block, manual_state FROM benchs");
+     $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member_id, associated_block_id, manual_state FROM benchs");
     
      if($statement_benchs){
          mysqli_stmt_execute($statement_benchs);
