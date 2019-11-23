@@ -15,8 +15,10 @@ if($link){
 		$statement = mysqli_prepare($link, "SELECT camserver, prioridad, tstamp, estadoUbicaciones
     									FROM status
 											WHERE camserver LIKE 'SVR1'
+                      AND session_id = ?
                       ORDER BY tstamp DESC
                       LIMIT 2");
+    mysqli_stmt_bind_param($statement, "s", $session);
 		//Revisar esta lógica para que no traiga un registro correspondiente a la sesión anterior (validar por fecha en la query)
       
 		if($statement){		
@@ -57,7 +59,7 @@ While(mysqli_stmt_fetch($statement_benchs)){
 //Hago un fetch para ver el registro más reciente de status (leí 2) y voy sumando en un array usando de índice associated_block los presentes y los totales de cada bloque
 //Luego minutes se calcula haciendo la diferencia entre el tstamp del registro más actual y el siguiente.
 mysqli_stmt_fetch($statement);
-$record_time = date_create_from_format('Y-m-d H:i:s',$tstamp);
+$record_time = date_create_from_format('Y-m-d H:i:s', $tstamp);
 
 //Las bancas arrancan en 1... como el índice de $bench_block son las bancas, debo arrancar el for en 1. 
 for($j = 1; $j <= strlen($estadoUbicaciones); $j++){ 
@@ -69,10 +71,11 @@ for($j = 1; $j <= strlen($estadoUbicaciones); $j++){
 //Si es el primer registro le cargo '0'.
 if(mysqli_stmt_fetch($statement)){
   $record_time = $record_time->diff(date_create_from_format('Y-m-d H:i:s',$tstamp));
+  $time = $record_time->i;
   echo "Diferencia de minutos entre lecturas: " .$record_time->i. "\n";
 }
 else{
-  $time = 0;
+  $time = 0; 
 }
 
 //Acá preparo el insert
@@ -85,7 +88,7 @@ foreach($blocks as $block_id => $block_info){
   //}
     $statement_insert = mysqli_prepare($link, "INSERT INTO block_history (session_id, block_id, minutes, presents, total) VALUES (?, ?, ?, ?, ?)");
     if($statement_insert){
-      mysqli_stmt_bind_param($statement_insert, "sssss", $session, $block_id, $record_time->i, $block_info["presents"], $block_info["total"]);
+      mysqli_stmt_bind_param($statement_insert, "sssss", $session, $block_id, $time, $block_info["presents"], $block_info["total"]);
       if(mysqli_stmt_execute($statement_insert)){
         $insertions++;
         $response["succes"] = true;
