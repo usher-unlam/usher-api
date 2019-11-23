@@ -3,20 +3,39 @@ require_once 'db_connect_web.php';
 
 $link = conectar();
 
-if(isset($_POST['session_id'])){
+/*if(isset($_POST['session_id'])){
   $session = $_POST['session_id'];
 }
 else{
     echo "Error, no se especificó la sesión";
     exit;
+}*/
+
+if($link){
+     $statement_sessions = mysqli_prepare($link, "SELECT session_id FROM `sessions` WHERE 1 ORDER BY session_id DESC LIMIT 1");
+    
+     if($statement_sessions){
+         mysqli_stmt_execute($statement_sessions);
+         mysqli_stmt_store_result($statement_sessions);
+  			 mysqli_stmt_bind_result($statement_sessions, $session_id);
+     }
+     else{
+         $response["error"] = "La consulta de sesiones no fue ejecutada";
+     }
+     
+     //Hago el fetch para guardar el session_id de la consulta anterior
+     mysqli_stmt_fetch($statement_sessions);
 }
+else{
+    echo "No fue posible obtener el último session_id";
+}     
 
 if($link){
 		$statement = mysqli_prepare($link, "SELECT camserver, prioridad, tstamp, estadoUbicaciones
     									FROM status
 											WHERE camserver LIKE 'SVR1'
                       AND  session_id = ?");
-		mysqli_stmt_bind_param($statement, "s", $session);
+		mysqli_stmt_bind_param($statement, "s", $session_id);
       
 		if($statement){		
 			mysqli_stmt_execute($statement);
@@ -38,7 +57,7 @@ $regTotales = 0;
 //Hago un primer fetch para inicializar el array de bancas con los valores del primer registro y para conocer la cantidad de bancas para el for
 mysqli_stmt_fetch($statement);
 for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){
-    $benchs[$i]["session"] = $session; 
+    $benchs[$i]["session"] = $session_id; 
     $benchs[$i]["presences"] = (int) $estadoUbicaciones[$i-1];
     $regTotales = 1;
     $response["succes"] = true;
@@ -76,7 +95,7 @@ $insertions = 0;
 for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){		
     $statement_insert = mysqli_prepare($link, "INSERT INTO member_history (session_id, block_id, member_id, presences, total) VALUES (?, ?, ?, ?, ?)");
     if($statement_insert){
-      mysqli_stmt_bind_param($statement_insert, "sssss", $session, $benchs[$i]["block_id"], $benchs[$i]["member_id"], $benchs[$i]["presences"], $benchs[$i]["total"]);
+      mysqli_stmt_bind_param($statement_insert, "sssss", $session_id, $benchs[$i]["block_id"], $benchs[$i]["member_id"], $benchs[$i]["presences"], $benchs[$i]["total"]);
       if(mysqli_stmt_execute($statement_insert)){
         $insertions++;
       }

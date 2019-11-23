@@ -3,13 +3,32 @@ require_once 'db_connect_web.php';
 
 $link = conectar();
 
-if(isset($_POST['session_id'])){
+/*if(isset($_POST['session_id'])){
   $session = $_POST['session_id'];
 }
 else{
     echo "Error, no se especificó la sesión";
     exit;
+}*/
+
+if($link){
+     $statement_sessions = mysqli_prepare($link, "SELECT session_id FROM `sessions` WHERE 1 ORDER BY session_id DESC LIMIT 1");
+    
+     if($statement_sessions){
+         mysqli_stmt_execute($statement_sessions);
+         mysqli_stmt_store_result($statement_sessions);
+  			 mysqli_stmt_bind_result($statement_sessions, $session_id);
+     }
+     else{
+         $response["error"] = "La consulta de sesiones no fue ejecutada";
+     }
+     
+     //Hago el fetch para guardar el session_id de la consulta anterior
+     mysqli_stmt_fetch($statement_sessions);
 }
+else{
+    echo "No fue posible obtener el último session_id";
+}     
 
 if($link){
 		$statement = mysqli_prepare($link, "SELECT camserver, prioridad, tstamp, estadoUbicaciones
@@ -18,7 +37,7 @@ if($link){
                       AND session_id = ?
                       ORDER BY tstamp DESC
                       LIMIT 2");
-    mysqli_stmt_bind_param($statement, "s", $session);
+    mysqli_stmt_bind_param($statement, "s", $session_id);
 		//Revisar esta lógica para que no traiga un registro correspondiente a la sesión anterior (validar por fecha en la query)
       
 		if($statement){		
@@ -71,7 +90,7 @@ for($j = 1; $j <= strlen($estadoUbicaciones); $j++){
 //Si es el primer registro le cargo '0'.
 if(mysqli_stmt_fetch($statement)){
   $record_time = $record_time->diff(date_create_from_format('Y-m-d H:i:s',$tstamp));
-  $time = $record_time->i;
+  $time = $record_time->s;
   echo "Diferencia de minutos entre lecturas: " .$record_time->i. "\n";
 }
 else{
@@ -80,7 +99,7 @@ else{
 
 //Acá preparo el insert
 $insertions = 0;
-echo "Estadisticas de sesion: " .$session. "\n";
+echo "Estadisticas de sesion: " .$session_id. "\n";
 //Recorro el array de bloques y realizando los inserts.
 foreach($blocks as $block_id => $block_info){
   //print_r($block_id);
@@ -88,7 +107,7 @@ foreach($blocks as $block_id => $block_info){
   //}
     $statement_insert = mysqli_prepare($link, "INSERT INTO block_history (session_id, block_id, minutes, presents, total) VALUES (?, ?, ?, ?, ?)");
     if($statement_insert){
-      mysqli_stmt_bind_param($statement_insert, "sssss", $session, $block_id, $time, $block_info["presents"], $block_info["total"]);
+      mysqli_stmt_bind_param($statement_insert, "sssss", $session_id, $block_id, $time, $block_info["presents"], $block_info["total"]);
       if(mysqli_stmt_execute($statement_insert)){
         $insertions++;
         $response["succes"] = true;
