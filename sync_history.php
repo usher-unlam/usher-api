@@ -3,6 +3,7 @@ require_once 'db_connect_web.php';
 require_once 'db_connect.php';
 
 $link = conectar();
+$linkSessions = conectar();
 $linkRec = conectarRec();
 
 if(isset($_POST['server'])){
@@ -79,10 +80,25 @@ if($link){
         }
         $manual_state .= $benchs[$i+1];
      }
+
+if($link){
+     $statement_sessions = mysqli_prepare($link, "SELECT session_id FROM `sessions` WHERE 1 ORDER BY session_id DESC LIMIT 1");
+    
+     if($statement_sessions){
+         mysqli_stmt_execute($statement_sessions);
+         mysqli_stmt_store_result($statement_sessions);
+  			 mysqli_stmt_bind_result($statement_sessions, $session_id);
+     }
+     else{
+         $response["error"] = "La consulta de sesiones no fue ejecutada";
+     }
+     
+     //Hago el fetch para guardar el session_id de la consulta anterior
+     mysqli_stmt_fetch($statement_sessions);
     
      if($response["succes"]){
-        $statement_history = mysqli_prepare($link, "INSERT INTO usher_web.status (camserver, prioridad, tstamp, estadoUbicaciones) VALUES(?, ?, ?, ?)");
-        mysqli_stmt_bind_param($statement_history, "ssss", $svr, $priority, $tstamp, $defStatus);
+        $statement_history = mysqli_prepare($link, "INSERT INTO usher_web.status (camserver, session_id, prioridad, tstamp, estadoUbicaciones) VALUES(?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($statement_history, "sssss", $svr, $session_id, $priority, $tstamp, $defStatus);
         
         $response["succes"] = false;
         
@@ -98,9 +114,12 @@ if($link){
      else{
         $response["succes"] = false;
      }
-   }
+  }
+}
     
     echo json_encode($response);
     
     $link->close();
+    $linkRec->close();
+    $linkSessions->close();
 ?>

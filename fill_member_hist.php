@@ -14,8 +14,9 @@ else{
 if($link){
 		$statement = mysqli_prepare($link, "SELECT camserver, prioridad, tstamp, estadoUbicaciones
     									FROM status
-											WHERE camserver LIKE 'SVR1'");
-		//mysqli_stmt_bind_param($statement, "s", $svr);
+											WHERE camserver LIKE 'SVR1'
+                      AND  session_id = ?");
+		mysqli_stmt_bind_param($statement, "s", $session);
       
 		if($statement){		
 			mysqli_stmt_execute($statement);
@@ -39,11 +40,12 @@ mysqli_stmt_fetch($statement);
 for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){
     $benchs[$i]["session"] = $session; 
     $benchs[$i]["presences"] = (int) $estadoUbicaciones[$i-1];
+    $regTotales = 1;
+    $response["succes"] = true;
 }
 
 //Recorro las rows y para cada una recorro el string estadoUbicaciones y sumo (0 o 1) a la cantidad de presencias de cada banca ($benchs[$i]) 
 while(mysqli_stmt_fetch($statement)){
-     $response["succes"] = true;
      for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){ 
        $benchs[$i]["presences"] = $benchs[$i]["presences"] + (int) $estadoUbicaciones[$i-1];
      }
