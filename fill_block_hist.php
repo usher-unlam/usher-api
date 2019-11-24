@@ -35,8 +35,8 @@ if($link){
     									FROM status
 											WHERE camserver LIKE 'SVR1'
                       AND session_id = ?
-                      ORDER BY tstamp DESC
-                      LIMIT 2");
+                      ORDER BY tstamp DESC");
+                      //LIMIT 2");
     mysqli_stmt_bind_param($statement, "s", $session_id);
 		//Revisar esta lógica para que no traiga un registro correspondiente a la sesión anterior (validar por fecha en la query)
       
@@ -88,13 +88,45 @@ for($j = 1; $j <= strlen($estadoUbicaciones); $j++){
 
 //Hago un segundo fetch para leer el registro de estado inmediatamente anterior y calcular la diferencia de tiempo entre ambos. Si es el primer registro que leo va a dar false la lectura.
 //Si es el primer registro le cargo '0'.
-if(mysqli_stmt_fetch($statement)){
+/*if(mysqli_stmt_fetch($statement)){
   $record_time = $record_time->diff(date_create_from_format('Y-m-d H:i:s',$tstamp));
   $time = $record_time->s;
   echo "Diferencia de minutos entre lecturas: " .$record_time->i. "\n";
 }
 else{
   $time = 0; 
+}*/
+
+//Leo el resto de las filas de status para saber la cantidad y multiplicar por el tiempo de sync. Así se cuántos minutos transcurrieron desde el inicio de la
+//sesión hasta el registro actual.
+$reg_quant = 1;
+While(mysqli_stmt_fetch($statement)){
+  $reg_quant++;
+}
+
+//Hago un select a la  tabla cronserver para saber cada cuánto está sincronizando los estados
+if($link){
+  $statement_cronserver = mysqli_prepare($link, "SELECT config
+    									FROM cronserver
+											WHERE id LIKE 'SYNC1'");
+      
+		if($statement_cronserver){		
+			mysqli_stmt_execute($statement_cronserver);
+			mysqli_stmt_store_result($statement_cronserver);
+			mysqli_stmt_bind_result($statement_cronserver, $config);
+    }
+    else{
+       $response["error"] = "La consulta de configuración de cronserver ejecutada";
+    }
+
+//Decodifico lo leido de la tabla cronserver y tomo la info correspondiente a la frecuencia de sync. Lo divido por 60 para obtener la expresión en minutos (está guardado en segundos).
+mysqli_stmt_fetch($statement_cronserver);
+$json_config = json_decode($config, true);
+$fill_block_frec = $json_config['fill_block_frec']/60;
+
+//Multiplico la cantidad de registros leidos por la frecuencia de sincronizacion.
+$elapsed_time = $reg_quant*$fill_block_frec;
+echo "Cantidad de registros: " .$reg_quant. " - Frecuencia de sync: " .$fill_block_frec. " - Tiempo transcurrido: " .$elapsed_time. "\n";
 }
 
 //Acá preparo el insert
@@ -107,7 +139,7 @@ foreach($blocks as $block_id => $block_info){
   //}
     $statement_insert = mysqli_prepare($link, "INSERT INTO block_history (session_id, block_id, minutes, presents, total) VALUES (?, ?, ?, ?, ?)");
     if($statement_insert){
-      mysqli_stmt_bind_param($statement_insert, "sssss", $session_id, $block_id, $time, $block_info["presents"], $block_info["total"]);
+      mysqli_stmt_bind_param($statement_insert, "sssss", $session_id, $block_id, $elapsed_time, $block_info["presents"], $block_info["total"]);
       if(mysqli_stmt_execute($statement_insert)){
         $insertions++;
         $response["succes"] = true;
