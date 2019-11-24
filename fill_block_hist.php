@@ -3,14 +3,6 @@ require_once 'db_connect_web.php';
 
 $link = conectar();
 
-/*if(isset($_POST['session_id'])){
-  $session = $_POST['session_id'];
-}
-else{
-    echo "Error, no se especificó la sesión";
-    exit;
-}*/
-
 if($link){
      $statement_sessions = mysqli_prepare($link, "SELECT session_id FROM `sessions` WHERE 1 ORDER BY session_id DESC LIMIT 1");
     
@@ -35,10 +27,9 @@ if($link){
     									FROM status
 											WHERE camserver LIKE 'SVR1'
                       AND session_id = ?
-                      ORDER BY tstamp DESC");
-                      //LIMIT 2");
+                      ORDER BY tstamp DESC
+                      LIMIT 1");
     mysqli_stmt_bind_param($statement, "s", $session_id);
-		//Revisar esta lógica para que no traiga un registro correspondiente a la sesión anterior (validar por fecha en la query)
       
 		if($statement){		
 			mysqli_stmt_execute($statement);
@@ -75,33 +66,14 @@ While(mysqli_stmt_fetch($statement_benchs)){
   $blocks[$associated_block]["total"] = 0; 
 }
 
-//Hago un fetch para ver el registro más reciente de status (leí 2) y voy sumando en un array usando de índice associated_block los presentes y los totales de cada bloque
-//Luego minutes se calcula haciendo la diferencia entre el tstamp del registro más actual y el siguiente.
+//Hago un fetch para ver el registro más reciente de status y voy sumando en un array usando de índice associated_block los presentes y los totales de cada bloque
+//Luego minutes se calcula sumando la frecuencia de carga de las estadísticas de bloque al valor de 'minutes' del último registro cargado en block_hist
 mysqli_stmt_fetch($statement);
-$record_time = date_create_from_format('Y-m-d H:i:s', $tstamp);
 
 //Las bancas arrancan en 1... como el índice de $bench_block son las bancas, debo arrancar el for en 1. 
 for($j = 1; $j <= strlen($estadoUbicaciones); $j++){ 
   $blocks[$bench_block[$j]]["presents"] += intval($estadoUbicaciones[$j-1]);
   $blocks[$bench_block[$j]]["total"]++;
-}
-
-//Hago un segundo fetch para leer el registro de estado inmediatamente anterior y calcular la diferencia de tiempo entre ambos. Si es el primer registro que leo va a dar false la lectura.
-//Si es el primer registro le cargo '0'.
-/*if(mysqli_stmt_fetch($statement)){
-  $record_time = $record_time->diff(date_create_from_format('Y-m-d H:i:s',$tstamp));
-  $time = $record_time->s;
-  echo "Diferencia de minutos entre lecturas: " .$record_time->i. "\n";
-}
-else{
-  $time = 0; 
-}*/
-
-//Leo el resto de las filas de status para saber la cantidad y multiplicar por el tiempo de sync. Así se cuántos minutos transcurrieron desde el inicio de la
-//sesión hasta el registro actual.
-$reg_quant = 1;
-While(mysqli_stmt_fetch($statement)){
-  $reg_quant++;
 }
 
 //Hago un select a la  tabla cronserver para saber cada cuánto está sincronizando los estados
@@ -119,14 +91,38 @@ if($link){
        $response["error"] = "La consulta de configuración de cronserver ejecutada";
     }
 
-//Decodifico lo leido de la tabla cronserver y tomo la info correspondiente a la frecuencia de sync. Lo divido por 60 para obtener la expresión en minutos (está guardado en segundos).
+//Decodifico lo leido de la tabla cronserver y tomo la info correspondiente a la frecuencia de generación del historial.
 mysqli_stmt_fetch($statement_cronserver);
 $json_config = json_decode($config, true);
-$fill_block_frec = $json_config['fill_block_frec']/60;
+$fill_block_frec = $json_config['fill_block_frec'];
 
-//Multiplico la cantidad de registros leidos por la frecuencia de sincronizacion.
-$elapsed_time = $reg_quant*$fill_block_frec;
-echo "Cantidad de registros: " .$reg_quant. " - Frecuencia de sync: " .$fill_block_frec. " - Tiempo transcurrido: " .$elapsed_time. "\n";
+    //Hago un select a la  tabla block_history conocer el 'minutes' del ultimo registro cargado 
+    if($link){
+      $statement_block_history = mysqli_prepare($link, "SELECT minutes
+        									FROM block_history
+    											WHERE session_id = ?
+                          ORDER BY minutes DESC
+                          LIMIT 1");
+        
+        mysqli_stmt_bind_param($statement_block_history, "s", $session_id);
+          
+    		if($statement_block_history){		
+    			mysqli_stmt_execute($statement_block_history);
+    			mysqli_stmt_store_result($statement_block_history);
+    			mysqli_stmt_bind_result($statement_block_history, $minutes);
+        }
+        else{
+           $response["error"] = "La consulta de minutos en block_history no fue ejecutada";
+        }
+
+        //Sumo la frecuencia de actualización a los minutos del último registro cargado en block_history. Si es el primer registro le pongo '0'.
+        if(mysqli_stmt_fetch($statement_block_history)){
+          $elapsed_time = $minutes + $fill_block_frec;
+        }
+        else{
+          $elapsed_time = 0;
+        }
+    }
 }
 
 //Acá preparo el insert

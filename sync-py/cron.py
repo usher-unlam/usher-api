@@ -19,7 +19,6 @@ class CronServer():
                     "CRON_TIMEJUMP_SEC": 0.1,
                     "sync_frec": 300, "fill_block_frec": 500,
                     "API_validation": "48370255gBrgdlpl050588",
-                    "CONN_TIMEOUT": 0.6, "CONN_CHECK_TIMEOUT": 5 , 
                     "DB_TIMEOUT" : { "CONNECT": 3, "STATUS_READ": 1000, "STATUS_WRITE": 2000 }
                     } 
         self.nombre = nombre
