@@ -70,7 +70,8 @@ if(isset($_POST['banca'])){
      $manual_state = '';
    
     //El array de bancas arranca en la posición 1; En la tabla está así, por eso arranco con $i+1. Así devuelvo la info correspondiente a cada banca en su subíndice
-    for ($i=0; $i < count($benchs); $i++){
+    //for ($i=0; $i < count($benchs); $i++){
+    for ($i=0; $i < strlen($estadoUbicaciones); $i++){
         if($benchs[$i+1] < 2){
            $defStatus .= $benchs[$i+1];
         }

@@ -18,7 +18,7 @@
 	}
     
     if($link){
-		$statement = mysqli_prepare($link, "SELECT blocks.name, block_history.session_id, block_history.minutes, block_history.presents, block_history.total
+		$statement = mysqli_prepare($link, "SELECT DISTINCT blocks.name, block_history.session_id, block_history.minutes, block_history.presents, block_history.total
 											FROM users, blocks, block_history
 											WHERE users.username LIKE ?
 											AND users.member_id = blocks.head_id
