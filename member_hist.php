@@ -12,6 +12,10 @@
       $session = $_POST['session'];
     }
     
+    if($username == 'webadmin'){
+      $username = '%';
+    }
+    
     $response = array();
     $response["error"] = $username. " " .$session;
     
@@ -35,7 +39,7 @@
        }
     }
     else{
-      $response["error"] = "No se estableció la conexión a la base de datos";
+      $response["error"] = "No se estableciï¿½ la conexiï¿½n a la base de datos";
     }
        
     $response["succes"] = false;
