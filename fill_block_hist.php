@@ -57,18 +57,19 @@ else{
 
 $response["succes"] = false;
 
+//Hago un fetch para ver el registro más reciente de status y voy sumando en un array usando de índice associated_block los presentes y los totales de cada bloque
+//Luego minutes se calcula sumando la frecuencia de carga de las estadísticas de bloque al valor de 'minutes' del último registro cargado en block_hist
+mysqli_stmt_fetch($statement);
+
 //Cargo el array de bancas para poder hacer las asignaciones correspondientes desde el array en el próximo paso.
 //Inicializo los contadores de totales y presentes para cada bloque.
-While(mysqli_stmt_fetch($statement_benchs)){
+for($k=1; $k<=strlen($estadoUbicaciones); $k++){
+  mysqli_stmt_fetch($statement_benchs);
   $bench_block[$number] = $associated_block;
   $bench_member[$number] = $associated_member;
   $blocks[$associated_block]["presents"] = 0;
   $blocks[$associated_block]["total"] = 0; 
 }
-
-//Hago un fetch para ver el registro más reciente de status y voy sumando en un array usando de índice associated_block los presentes y los totales de cada bloque
-//Luego minutes se calcula sumando la frecuencia de carga de las estadísticas de bloque al valor de 'minutes' del último registro cargado en block_hist
-mysqli_stmt_fetch($statement);
 
 //Las bancas arrancan en 1... como el índice de $bench_block son las bancas, debo arrancar el for en 1. 
 for($j = 1; $j <= strlen($estadoUbicaciones); $j++){ 

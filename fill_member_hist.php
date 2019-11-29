@@ -56,6 +56,7 @@ $response["succes"] = false;
 $regTotales = 0;
 //Hago un primer fetch para inicializar el array de bancas con los valores del primer registro y para conocer la cantidad de bancas para el for
 mysqli_stmt_fetch($statement);
+$cant_benchs = strlen($estadoUbicaciones);
 for($i=1 ; $i<=strlen($estadoUbicaciones); $i++){
     $benchs[$i]["session"] = $session_id; 
     $benchs[$i]["presences"] = (int) $estadoUbicaciones[$i-1];
@@ -72,7 +73,9 @@ while(mysqli_stmt_fetch($statement)){
 }
 
 if($response["succes"]){
-      $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member_id, associated_block_id FROM benchs");
+      $statement_benchs = mysqli_prepare($link, "SELECT number, associated_member_id, associated_block_id FROM benchs
+                                                 ORDER BY number LIMIT ?");
+      mysqli_stmt_bind_param($statement_benchs, "s", $cant_benchs);
       
       if($statement_benchs){		
 			  mysqli_stmt_execute($statement_benchs);
